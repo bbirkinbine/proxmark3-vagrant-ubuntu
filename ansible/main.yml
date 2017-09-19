@@ -32,6 +32,7 @@
         - perl
         - pkg-config
         - wget
+        - ncurses-dev
         - libncurses5-dev
         - gcc-arm-none-eabi
         - libstdc++-arm-none-eabi-newlib
@@ -45,18 +46,18 @@
         version: master
         force: yes
 
-    - name: "setup usb udev rules"
-      become: yes
-      copy:
-        src: ~/proxmark3/driver/77-mm-usb-device-blacklist.rules
-        dest: /etc/udev/rules.d/77-mm-usb-device-blacklist.rules
-        owner: root
-        group: root
-        mode: 0644
+    #- name: "setup usb udev rules"
+    #  become: yes
+    #  copy:
+    #    src: ~/proxmark3/driver/77-mm-usb-device-blacklist.rules
+    #    dest: /etc/udev/rules.d/77-mm-usb-device-blacklist.rules
+    #    owner: root
+    #    group: root
+    #    mode: 0644
 
-    - name: "udevadm reload"
-      become: yes
-      shell: "udevadm control --reload-rules"
+    #- name: "udevadm reload"
+    #  become: yes
+    #  shell: "udevadm control --reload-rules"
       #args:
       #  chdir: ~/proxmark3
 
