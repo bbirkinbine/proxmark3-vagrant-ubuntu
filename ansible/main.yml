@@ -1,0 +1,67 @@
+# Written assuming ubuntu 16.04 server
+---
+- hosts: all
+  gather_facts: yes
+
+  tasks:
+
+    - name: "updates"
+      become: true
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: "get linux signing key"
+      become: yes
+      apt_key:
+        url: https://dl-ssl.google.com/linux/linux_signing_key.pub
+        state: present
+
+    - name: "install pre-requisites"
+      become: yes
+      apt: "name={{ item }} state=installed"
+      with_items:
+        - git
+        - p7zip
+        - build-essential
+        - libreadline5
+        - libreadline-dev
+        - libusb-0.1-4
+        - libusb-dev
+        - libqt4-dev
+        - perl
+        - pkg-config
+        - wget
+        - libncurses5-dev
+        - gcc-arm-none-eabi
+        - libstdc++-arm-none-eabi-newlib
+
+    - name: "git clone source"
+      become: no
+      git:
+        repo: https://github.com/proxmark/proxmark3.git
+        dest: ~/proxmark3
+        depth: 1
+        version: master
+        force: yes
+
+    - name: "setup usb udev rules"
+      become: yes
+      copy:
+        src: ~/proxmark3/driver/77-mm-usb-device-blacklist.rules
+        dest: /etc/udev/rules.d/77-mm-usb-device-blacklist.rules
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: "udevadm reload"
+      become: yes
+      shell: "udevadm control --reload-rules"
+      #args:
+      #  chdir: ~/proxmark3
+
+    - name: "make all proxmark3"
+      become: no
+      shell: "make all"
+      args:
+        chdir: ~/proxmark3
