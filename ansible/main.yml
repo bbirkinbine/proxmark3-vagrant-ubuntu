@@ -5,17 +5,18 @@
 
   tasks:
 
-    - name: "updates"
-      become: true
-      apt:
-        update_cache: yes
-        upgrade: dist
-
     - name: "get linux signing key"
       become: yes
       apt_key:
         url: https://dl-ssl.google.com/linux/linux_signing_key.pub
         state: present
+
+    # update manually and install linux-image-extra-$(uname -r) manually after reboot to get new kernel modules
+    #- name: "updates"
+    #  become: true
+    #  apt:
+    #    update_cache: yes
+    #    upgrade: dist
 
     - name: "install pre-requisites"
       become: yes
@@ -37,6 +38,15 @@
         - gcc-arm-none-eabi
         - libstdc++-arm-none-eabi-newlib
 
+    - name: "get kernel release"
+      shell: uname -r | xargs
+      register: kernel_release
+
+    - name: "install linux-image-extra so that cdc_acm kernel module is available to proxmark3.  Creates /dev/ttyACM0"
+      become: yes
+      apt: "name=linux-image-extra-{{ kernel_release.stdout }}"
+      state: installed
+
     - name: "git clone source"
       become: no
       git:
@@ -46,20 +56,18 @@
         version: master
         force: yes
 
-    #- name: "setup usb udev rules"
-    #  become: yes
-    #  copy:
-    #    src: ~/proxmark3/driver/77-mm-usb-device-blacklist.rules
-    #    dest: /etc/udev/rules.d/77-mm-usb-device-blacklist.rules
-    #    owner: root
-    #    group: root
-    #    mode: 0644
+    - name: "setup usb udev rules"
+      become: yes
+      copy:
+        src: ~/proxmark3/driver/77-mm-usb-device-blacklist.rules
+        dest: /etc/udev/rules.d/77-mm-usb-device-blacklist.rules
+        owner: root
+        group: root
+        mode: 0644
 
-    #- name: "udevadm reload"
-    #  become: yes
-    #  shell: "udevadm control --reload-rules"
-      #args:
-      #  chdir: ~/proxmark3
+    - name: "udevadm reload"
+      become: yes
+      shell: "udevadm control --reload-rules"
 
     - name: "make all proxmark3"
       become: no
