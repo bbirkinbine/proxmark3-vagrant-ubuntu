@@ -38,6 +38,15 @@
         - gcc-arm-none-eabi
         - libstdc++-arm-none-eabi-newlib
 
+    # uncomment below if you want the UI desktop (ie. to see proxmark data plots)
+    # you will probably have to change the ubuntu password to something you know to login to UI
+    # and re-install the linux kernel modules: apt-get install linux-image-extra-$(uname -r) so that cdc_acm module works
+    #- name: "install ubuntu-desktop"
+    #  become: yes
+    #  apt: "name={{ item }} state=installed"
+    #  with_items:
+    #    - ubuntu-desktop
+
     - name: "get kernel release"
       shell: uname -r | xargs
       register: kernel_release
